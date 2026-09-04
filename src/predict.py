@@ -8,4 +8,4 @@ new_data = pd.DataFrame([[123, 56, 89]])
 
 predictions = model.predict(new_data)
 
-print("Predicted sales:", predictions)
+print("Predicted sales:", predictions) 
