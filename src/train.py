@@ -10,12 +10,10 @@ from sklearn.metrics import root_mean_squared_error, r2_score
 df = pd.read_csv("D:\\MlOps Day 1\\data\\data.csv")
 
 
-# Features and target
-X = df.drop(columns=["Sales"])
-y = df["Sales"]
 
 # Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
+X,y = df[["TV","Radio", "Newspaper"]],df[["Sales"]]
+Xtrain, Xtest, ytrain, ytest = train_test_split(
     X,
     y,
     test_size=0.2,
@@ -28,16 +26,16 @@ model = LinearRegression()
 
 
 # Train model
-model.fit(X_train, y_train)
+model.fit(Xtrain, ytrain)
 
 
 # Prediction
-predictions = model.predict(X_test)
+ypred = model.predict(Xtest)
 
 
 # Evaluation
-rmse = root_mean_squared_error(y_test, predictions)
-r2 = r2_score(y_test, predictions)
+rmse = root_mean_squared_error(ytest, ypred)
+r2 = r2_score(ytest, ypred)
 
 
 print("RMSE:", rmse)

@@ -2,10 +2,11 @@ import joblib
 import pandas as pd
 import numpy as np
 
-model = joblib.load("model\\linear_reg_model.pkl")
 
-new_data = pd.DataFrame([[123, 56, 89]])
+new_data = pd.DataFrame([[100, 250, 198]], columns=["TV", "Radio", "Newspaper"])
+
+model = joblib.load("D:\MlOps Day 1\model\linear_reg_model.pkl")
 
 predictions = model.predict(new_data)
 
-print("Predicted sales:", predictions) 
+print(f"Predicted sales is {predictions}") 
