@@ -16,9 +16,20 @@ MODELS_DIR = os.path.join(BASE_DIR, "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 # 1. Setup Tracking
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
+MLRUNS_DIR = os.path.join(BASE_DIR, "mlruns")
+os.makedirs(MLRUNS_DIR, exist_ok=True)
+
+mlflow.set_tracking_uri(f"sqlite:///{DB_PATH}")
+
 experiment_name = "Advertising_Sales_Regression"
 registered_model_name = "Sales_Prediction_Model"
+
+if mlflow.get_experiment_by_name(experiment_name) is None:
+    mlflow.create_experiment(
+        experiment_name,
+        artifact_location=f"file:///{os.path.join(BASE_DIR, 'mlruns').replace(os.sep, '/')}"
+    )
+
 mlflow.set_experiment(experiment_name)
 
 # 2. Data Preparation
@@ -44,7 +55,7 @@ for name, model in models.items():
         mlflow.log_metric("test_rmse", rmse)
 
         #Notice: No registered_model_name here
-        mlflow.sklearn.log_model(model, name="model")
+        mlflow.sklearn.log_model(model, artifact_path="model")
         batch_runs.append((run.info.run_id, rmse))
 
         # 4. Find Best Model
@@ -91,10 +102,9 @@ champion_info = client.get_model_version_by_alias(
     "champion"
 )
 
-champion_model_uri = f"models:/{registered_model_name}/{champion_info.version}"
+champion_model_uri = f"runs:/{champion_info.run_id}/model"
 
 champion_model = mlflow.sklearn.load_model(champion_model_uri)
-
 # Save standalone champion artifact
 champion_export_path = os.path.join(MODELS_DIR, "champion_model.pkl")
 joblib.dump(champion_model, champion_export_path)
