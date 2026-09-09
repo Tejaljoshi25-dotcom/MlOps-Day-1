@@ -22,7 +22,7 @@ registered_model_name = "Sales_Prediction_Model"
 mlflow.set_experiment(experiment_name)
 
 # 2. Data Preparation
-df = df = pd.read_csv("data/data.csv")
+df = pd.read_csv(DATA_PATH)
 X, y = df[["TV", "Radio", "Newspaper"]], df["Sales"]
 xtrain, xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -44,7 +44,7 @@ for name, model in models.items():
         mlflow.log_metric("test_rmse", rmse)
 
         #Notice: No registered_model_name here
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        mlflow.sklearn.log_model(model, name="model")
         batch_runs.append((run.info.run_id, rmse))
 
         # 4. Find Best Model
@@ -85,7 +85,14 @@ except Exception:
     print(f"No existing champion found. Version {challenger_version} crowned as first Champion!")
 
 # Load current champion from MLflow Registry
-champion_model_uri = f"models:/{registered_model_name}@champion"
+# Load current champion from MLflow Registry
+champion_info = client.get_model_version_by_alias(
+    registered_model_name,
+    "champion"
+)
+
+champion_model_uri = f"models:/{registered_model_name}/{champion_info.version}"
+
 champion_model = mlflow.sklearn.load_model(champion_model_uri)
 
 # Save standalone champion artifact
